@@ -1,0 +1,130 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title"><%= deal.title %></h1>
+    <div class="muted">
+      <span class="stage stage-<%= deal.stage %> me-2"><%= deal.stageLabel %></span>
+      <%= deal.contact ? deal.contact.fullName : '—' %>
+      <% if (deal.company) { %>
+        · <a href="/contacts/companies/<%= deal.company.id %>/"><%= deal.company.name %></a>
+      <% } %>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/deals/<%= deal.id %>/edit/">Редакция</a>
+    <a class="btn btn-success" href="/tasks/new/?deal=<%= deal.id %>">Нова задача</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-7">
+    <div class="card-soft p-4 mb-3">
+      <h5 class="fw-bold mb-3 border-bottom pb-2">Детайли за сделката</h5>
+      <div class="row g-3">
+        <div class="col-sm-6">
+          <div class="text-muted small text-uppercase fw-bold">Стойност</div>
+          <div class="fs-4 fw-bold text-success"><%= formatNumber(deal.value) %> лв.</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small text-uppercase fw-bold">Вероятност</div>
+          <div class="fs-4 fw-bold"><%= deal.probability %>%</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small text-uppercase fw-bold">Претеглена стойност</div>
+          <div class="fs-5 fw-semibold"><%= formatNumber(deal.weightedValue) %> лв.</div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small text-uppercase fw-bold">Очакван срок</div>
+          <div><%= deal.displayExpectedDate || 'Не е посочен' %></div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small text-uppercase fw-bold">Дата на затваряне</div>
+          <div><%= deal.displayClosedAt || 'Сделката е активна' %></div>
+        </div>
+        <div class="col-sm-6">
+          <div class="text-muted small text-uppercase fw-bold">Отговорен търговец</div>
+          <div><%= deal.ownerName %></div>
+        </div>
+      </div>
+
+      <% if (deal.notes) { %>
+        <div class="mt-3 pt-3 border-top">
+          <h6 class="fw-bold small text-muted text-uppercase mb-1">Бележки</h6>
+          <p class="muted mb-0"><%= deal.notes %></p>
+        </div>
+      <% } %>
+    </div>
+
+    <!-- Deal tasks -->
+    <div class="card-soft p-4">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Свързани задачи (<%= deal.tasks.length %>)</h5>
+        <a class="btn btn-sm btn-outline-success" href="/tasks/new/?deal=<%= deal.id %>">+ Нова задача</a>
+      </div>
+      <% if (deal.tasks && deal.tasks.length > 0) { %>
+        <% deal.tasks.forEach(function(task) { %>
+          <div class="py-2 border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <a href="/tasks/<%= task.id %>/edit/" class="fw-semibold text-decoration-none"><%= task.title %></a>
+              <div class="small text-muted"><%= task.kindLabel %> · <%= task.displayDue %></div>
+            </div>
+            <div>
+              <% if (task.completed) { %>
+                <span class="badge bg-success">изпълнена</span>
+              <% } else { %>
+                <form method="post" action="/tasks/<%= task.id %>/complete/" style="display:inline;">
+                  <button class="btn btn-sm btn-outline-success py-0 px-2" title="Завърши">✓ Завърши</button>
+                </form>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="muted mb-0">Няма свързани задачи към тази сделка.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="col-lg-5">
+    <!-- Fast stage switcher -->
+    <div class="card-soft p-3 mb-3">
+      <h6 class="fw-bold mb-2">Бърза смяна на фаза</h6>
+      <form method="post" action="/deals/<%= deal.id %>/stage/" class="d-flex gap-2">
+        <select name="stage" class="form-select">
+          <option value="new_lead" <%= deal.stage === 'new_lead' ? 'selected' : '' %>>Нов лийд (20%)</option>
+          <option value="negotiation" <%= deal.stage === 'negotiation' ? 'selected' : '' %>>Преговори (55%)</option>
+          <option value="closed_won" <%= deal.stage === 'closed_won' ? 'selected' : '' %>>Затворена спечелена (100%)</option>
+          <option value="closed_lost" <%= deal.stage === 'closed_lost' ? 'selected' : '' %>>Затворена загубена (0%)</option>
+        </select>
+        <button type="submit" class="btn btn-primary">Смени</button>
+      </form>
+    </div>
+
+    <!-- History Audit Trail -->
+    <div class="card-soft p-4">
+      <h5 class="fw-bold mb-3">История на етапите</h5>
+      <% if (deal.history && deal.history.length > 0) { %>
+        <div class="timeline">
+          <% deal.history.forEach(function(item) { %>
+            <div class="border-bottom py-2">
+              <div class="d-flex justify-content-between">
+                <span class="fw-semibold text-primary">
+                  <%= item.fromStage ? item.fromLabel + ' → ' + item.toLabel : 'Създадена като ' + item.toLabel %>
+                </span>
+                <small class="muted"><%= item.displayDate %></small>
+              </div>
+              <small class="muted">
+                Променено от: <%= item.changedBy ? (item.changedBy.firstName + ' ' + item.changedBy.lastName).trim() : 'Система' %>
+              </small>
+            </div>
+          <% }); %>
+        </div>
+      <% } else { %>
+        <p class="muted mb-0">Няма регистрирана история за етапите.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

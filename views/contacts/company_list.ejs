@@ -1,0 +1,65 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Компании</h1>
+    <div class="muted">Корпоративни клиенти и партньори.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/contacts/">Контакти</a>
+    <a class="btn btn-success" href="/contacts/companies/new/">Нова компания</a>
+  </div>
+</div>
+
+<form class="mb-3" method="get" action="/contacts/companies/">
+  <div class="input-group">
+    <input class="form-control" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Търсене по име на компания">
+    <button class="btn btn-outline-secondary" type="submit">Търси</button>
+    <% if (typeof q !== 'undefined' && q) { %>
+      <a class="btn btn-outline-danger" href="/contacts/companies/">Изчисти</a>
+    <% } %>
+  </div>
+</form>
+
+<div class="card-soft">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Компания</th>
+          <th>Индустрия</th>
+          <th>Град / Адрес</th>
+          <th>Уебсайт</th>
+          <th>Представител</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% if (companies && companies.length > 0) { %>
+        <% companies.forEach(function(c) { %>
+          <tr>
+            <td>
+              <a href="/contacts/companies/<%= c.id %>/" class="fw-semibold text-decoration-none"><%= c.name %></a>
+            </td>
+            <td><%= c.industry || '—' %></td>
+            <td><%= c.address || '—' %></td>
+            <td>
+              <% if (c.website) { %>
+                <a href="<%= c.website %>" target="_blank" rel="noopener" class="text-muted"><%= c.website %></a>
+              <% } else { %>
+                —
+              <% } %>
+            </td>
+            <td><%= c.ownerName %></td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="5" class="muted p-4 text-center">Няма намерени компании.</td>
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

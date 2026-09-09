@@ -1,0 +1,86 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Pipeline</h1>
+    <div class="muted">Нов лийд → Преговори → Затворена. Преместете сделката с бутоните на картата.</div>
+  </div>
+  <a class="btn btn-success" href="/deals/new/">Нова сделка</a>
+</div>
+
+<div class="pipeline">
+  <% columns.forEach(function(col) { %>
+    <div class="card-soft pipeline-col">
+      <div class="d-flex justify-content-between align-items-center mb-3 border-bottom pb-2">
+        <strong class="fw-bold"><%= col.label %></strong>
+        <span class="badge bg-light text-dark border"><%= formatNumber(col.value) %> лв.</span>
+      </div>
+
+      <% if (col.deals && col.deals.length > 0) { %>
+        <% col.deals.forEach(function(deal) { %>
+          <div class="deal-card shadow-sm">
+            <h6 class="fw-bold mb-1">
+              <a href="/deals/<%= deal.id %>/" class="text-decoration-none text-dark"><%= deal.title %></a>
+            </h6>
+            <div class="muted small mb-2">
+              <%= deal.contact ? deal.contact.fullName : '—' %> · <%= deal.company ? deal.company.name : '—' %>
+            </div>
+            <div class="fw-bold text-success mb-2">
+              <%= formatNumber(deal.value) %> лв. · <span class="text-muted"><%= deal.probability %>%</span>
+            </div>
+
+            <div class="d-flex gap-1 flex-wrap">
+              <% if (deal.stage !== 'new_lead') { %>
+                <form method="post" action="/deals/<%= deal.id %>/stage/">
+                  <input type="hidden" name="stage" value="new_lead">
+                  <button type="submit" class="btn btn-sm btn-outline-secondary py-0 px-2" style="font-size:0.75rem;">Лийд</button>
+                </form>
+              <% } %>
+              <% if (deal.stage !== 'negotiation') { %>
+                <form method="post" action="/deals/<%= deal.id %>/stage/">
+                  <input type="hidden" name="stage" value="negotiation">
+                  <button type="submit" class="btn btn-sm btn-outline-warning py-0 px-2" style="font-size:0.75rem;">Преговори</button>
+                </form>
+              <% } %>
+              <% if (deal.stage !== 'closed_won') { %>
+                <form method="post" action="/deals/<%= deal.id %>/stage/">
+                  <input type="hidden" name="stage" value="closed_won">
+                  <button type="submit" class="btn btn-sm btn-outline-success py-0 px-2" style="font-size:0.75rem;">Спечелена</button>
+                </form>
+              <% } %>
+              <form method="post" action="/deals/<%= deal.id %>/stage/">
+                <input type="hidden" name="stage" value="closed_lost">
+                <button type="submit" class="btn btn-sm btn-outline-danger py-0 px-2" style="font-size:0.75rem;">Загубена</button>
+              </form>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="muted small text-center py-4">Няма сделки в този етап</p>
+      <% } %>
+    </div>
+  <% }); %>
+</div>
+
+<% if (lostDeals && lostDeals.length > 0) { %>
+  <h5 class="mt-4 fw-bold">Загубени сделки (<%= lostDeals.length %>)</h5>
+  <div class="card-soft p-3">
+    <% lostDeals.forEach(function(deal) { %>
+      <div class="d-flex justify-content-between align-items-center py-2 border-bottom">
+        <div>
+          <a href="/deals/<%= deal.id %>/" class="fw-semibold text-decoration-none text-danger"><%= deal.title %></a>
+          <span class="muted small ms-2"><%= deal.contact ? deal.contact.fullName : '' %></span>
+        </div>
+        <div class="d-flex align-items-center gap-3">
+          <span class="fw-semibold"><%= formatNumber(deal.value) %> лв.</span>
+          <form method="post" action="/deals/<%= deal.id %>/stage/">
+            <input type="hidden" name="stage" value="new_lead">
+            <button type="submit" class="btn btn-sm btn-outline-secondary py-0">Върни като лийд</button>
+          </form>
+        </div>
+      </div>
+    <% }); %>
+  </div>
+<% } %>
+
+<%- include('../layout/footer') %>

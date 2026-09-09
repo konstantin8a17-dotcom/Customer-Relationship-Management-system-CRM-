@@ -1,0 +1,138 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Табло</h1>
+    <div class="muted">Преглед на pipeline, прогноза и предстоящи действия.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/contacts/new/">Нов контакт</a>
+    <a class="btn btn-success" href="/deals/new/">Нова сделка</a>
+  </div>
+</div>
+
+<div class="row g-3 mb-4">
+  <div class="col-md-3">
+    <div class="card-soft kpi">
+      <div class="label">Контакти</div>
+      <div class="value"><%= contactCount %></div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card-soft kpi">
+      <div class="label">Отворени сделки</div>
+      <div class="value"><%= openCount %></div>
+      <div class="muted"><%= formatNumber(openValue) %> лв.</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card-soft kpi">
+      <div class="label">Претеглена прогноза</div>
+      <div class="value"><%= formatNumber(forecast) %> лв.</div>
+    </div>
+  </div>
+  <div class="col-md-3">
+    <div class="card-soft kpi">
+      <div class="label">Спечелени / просрочени задачи</div>
+      <div class="value"><%= formatNumber(wonValue) %> лв.</div>
+      <div class="muted"><%= dueTasks %> задачи днес или просрочени</div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card-soft p-3">
+      <h5 class="fw-bold mb-3">Текущ pipeline</h5>
+      <canvas id="funnelChart" height="180"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-soft p-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h5 class="fw-bold mb-0">Предстоящи задачи</h5>
+        <a href="/tasks/new/" class="btn btn-sm btn-outline-success">+ Добави</a>
+      </div>
+      <% if (upcoming && upcoming.length > 0) { %>
+        <% upcoming.forEach(function(task) { %>
+          <div class="d-flex justify-content-between align-items-center border-bottom py-2">
+            <div>
+              <strong class="d-block"><%= task.title %></strong>
+              <div class="muted small"><%= task.kindLabel %> · <%= task.displayDue %></div>
+            </div>
+            <div class="d-flex align-items-center gap-2">
+              <form method="post" action="/tasks/<%= task.id %>/complete/" style="display:inline;">
+                <button class="btn btn-sm btn-outline-success py-0 px-2" title="Маркирай като завършена">✓</button>
+              </form>
+              <a href="/tasks/<%= task.id %>/edit/" class="btn btn-sm btn-link text-decoration-none">отвори</a>
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="muted mb-0">Няма предстоящи задачи.</p>
+      <% } %>
+    </div>
+  </div>
+</div>
+
+<div class="card-soft p-3 mt-3">
+  <h5 class="fw-bold mb-3">Последни сделки</h5>
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Сделка</th>
+          <th>Етап</th>
+          <th>Стойност</th>
+          <th>Вероятност</th>
+          <th>Представител</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% if (recentDeals && recentDeals.length > 0) { %>
+        <% recentDeals.forEach(function(deal) { %>
+          <tr>
+            <td><a href="/deals/<%= deal.id %>/" class="fw-semibold text-decoration-none"><%= deal.title %></a></td>
+            <td><span class="stage stage-<%= deal.stage %>"><%= deal.stageLabel %></span></td>
+            <td><%= formatNumber(deal.value) %> лв.</td>
+            <td><%= deal.probability %>%</td>
+            <td><%= deal.ownerName %></td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="5" class="muted p-3">Няма намерени сделки.</td>
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  const funnelData = <%- funnelJson %>;
+  new Chart(document.getElementById('funnelChart'), {
+    type: 'bar',
+    data: {
+      labels: funnelData.labels,
+      datasets: [{
+        data: funnelData.values,
+        backgroundColor: ['#0ea5e9', '#f59e0b', '#10b981'],
+        borderRadius: 8
+      }]
+    },
+    options: {
+      responsive: true,
+      plugins: { legend: { display: false } },
+      scales: {
+        y: {
+          beginAtZero: true,
+          ticks: { precision: 0 }
+        }
+      }
+    }
+  });
+</script>
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,59 @@
+<%- include('../layout/header') %>
+
+<h1 class="page-title mb-3">Нов търговски представител / потребител</h1>
+
+<div class="card-soft p-4" style="max-width: 600px">
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <form method="post" action="/accounts/users/new/">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Потребителско име</label>
+      <input type="text" name="username" class="form-control" required placeholder="напр. stefan">
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Име</label>
+        <input type="text" name="firstName" class="form-control" required placeholder="Стефан">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Фамилия</label>
+        <input type="text" name="lastName" class="form-control" required placeholder="Тодоров">
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Имейл</label>
+        <input type="email" name="email" class="form-control" required placeholder="stefan@crm.local">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Телефон</label>
+        <input type="text" name="phone" class="form-control" placeholder="+359 88 ...">
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Роля</label>
+        <select name="role" class="form-select" required>
+          <option value="sales_rep" selected>Търговски представител</option>
+          <option value="admin">Администратор</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Парола</label>
+        <input type="password" name="password" class="form-control" value="Demo12345" required>
+      </div>
+    </div>
+
+    <div class="d-flex gap-2 mt-4">
+      <button type="submit" class="btn btn-success px-4">Създай потребител</button>
+      <a class="btn btn-outline-secondary" href="/accounts/users/">Назад</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../layout/footer') %>

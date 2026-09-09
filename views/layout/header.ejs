@@ -1,0 +1,105 @@
+<!DOCTYPE html>
+<html lang="bg">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title><%= typeof title !== 'undefined' && title ? title + " · Sales CRM" : "Sales CRM" %></title>
+  <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.3/dist/css/bootstrap.min.css" rel="stylesheet">
+  <link href="https://fonts.googleapis.com/css2?family=Manrope:wght@400;600;700;800&display=swap" rel="stylesheet">
+  <link href="/static/css/crm.css" rel="stylesheet">
+  <style>
+    .user-switcher {
+      background: rgba(255, 255, 255, 0.08);
+      border-radius: 8px;
+      padding: 0.5rem;
+      margin-top: 0.5rem;
+    }
+    .user-switcher select {
+      background: #1e293b;
+      color: #e2e8f0;
+      border: 1px solid #334155;
+      font-size: 0.78rem;
+    }
+  </style>
+</head>
+<body>
+<div class="app-shell">
+  <aside class="sidebar d-flex flex-column">
+    <div class="brand">
+      <div class="brand-mark">C</div>
+      <div>
+        <strong>Sales CRM</strong>
+        <small>Търговски екип</small>
+      </div>
+    </div>
+    
+    <a class="nav-link <%= typeof activeNav !== 'undefined' && activeNav === 'dashboard' ? 'active' : '' %>" href="/">
+      <span>Табло</span>
+    </a>
+    
+    <a class="nav-link <%= typeof activeNav !== 'undefined' && (activeNav === 'contacts' || activeNav === 'companies') ? 'active' : '' %>" href="/contacts/">
+      <span>Контакти</span>
+    </a>
+    
+    <a class="nav-link <%= typeof activeNav !== 'undefined' && activeNav === 'pipeline' ? 'active' : '' %>" href="/deals/pipeline/">
+      <span>Pipeline</span>
+    </a>
+    
+    <a class="nav-link <%= typeof activeNav !== 'undefined' && activeNav === 'deals' ? 'active' : '' %>" href="/deals/">
+      <span>Сделки</span>
+    </a>
+    
+    <a class="nav-link <%= typeof activeNav !== 'undefined' && activeNav === 'tasks' ? 'active' : '' %>" href="/tasks/">
+      <span>Задачи</span>
+      <% if (typeof dueTasksCount !== 'undefined' && dueTasksCount > 0) { %>
+        <span class="badge-due"><%= dueTasksCount %></span>
+      <% } %>
+    </a>
+    
+    <a class="nav-link <%= typeof activeNav !== 'undefined' && activeNav === 'calendar' ? 'active' : '' %>" href="/tasks/calendar/">
+      <span>Календар</span>
+    </a>
+    
+    <a class="nav-link <%= typeof activeNav !== 'undefined' && activeNav === 'reports' ? 'active' : '' %>" href="/reports/">
+      <span>Отчети</span>
+    </a>
+    
+    <% if (currentUser && (currentUser.role === 'admin' || currentUser.isSuperuser)) { %>
+      <a class="nav-link <%= typeof activeNav !== 'undefined' && activeNav === 'users' ? 'active' : '' %>" href="/accounts/users/">
+        <span>Потребители</span>
+      </a>
+    <% } %>
+    
+    <div class="sidebar-foot">
+      <div class="auth-role">
+        <%= currentUser.role === 'admin' ? 'Администратор' : 'Търговски представител' %>
+      </div>
+      <div class="fw-bold text-white mt-1">
+        <%= (currentUser.firstName + ' ' + currentUser.lastName).trim() || currentUser.username %>
+      </div>
+      
+      <!-- Quick user switch for testing roles -->
+      <div class="user-switcher">
+        <label class="small text-muted d-block mb-1" style="font-size:0.7rem;">Смяна на роля / демо:</label>
+        <form method="get" action="/accounts/switch">
+          <select name="user" class="form-select form-select-sm" onchange="this.form.submit()">
+            <option value="admin" <%= currentUser.username === 'admin' ? 'selected' : '' %>>Админ (Admin)</option>
+            <option value="ivan" <%= currentUser.username === 'ivan' ? 'selected' : '' %>>Иван (Търговец)</option>
+            <option value="maria" <%= currentUser.username === 'maria' ? 'selected' : '' %>>Мария (Търговец)</option>
+          </select>
+        </form>
+      </div>
+
+      <form method="post" action="/accounts/logout/" class="mt-2">
+        <button type="submit" class="btn btn-sm btn-outline-light w-100">Изход</button>
+      </form>
+    </div>
+  </aside>
+
+  <main class="content">
+    <% if (typeof flash !== 'undefined' && flash && flash.message) { %>
+      <div class="alert alert-<%= flash.type || 'success' %> alert-dismissible fade show" role="alert">
+        <%= flash.message %>
+        <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
+      </div>
+    <% } %>

@@ -1,0 +1,6 @@
+{
+  "name": "Customer Relationship Management System",
+  "description": "CRM система за управление на контакти, компании, сделки (pipeline), задачи, календари и отчети за продажбите.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}

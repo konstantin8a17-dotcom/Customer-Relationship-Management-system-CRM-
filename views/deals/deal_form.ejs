@@ -1,0 +1,99 @@
+<%- include('../layout/header') %>
+
+<h1 class="page-title mb-3"><%= pageTitle %></h1>
+
+<div class="card-soft p-4" style="max-width: 720px">
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <form method="post" action="<%= formAction %>">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Заглавие на сделката</label>
+      <input type="text" name="title" class="form-control" value="<%= deal ? deal.title : '' %>" required placeholder="напр. CRM внедряване за централа">
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Контакт (Клиент)</label>
+        <select name="contactId" class="form-select" required>
+          <option value="">-- Изберете контакт --</option>
+          <% contacts.forEach(function(c) { %>
+            <option value="<%= c.id %>" <%= (deal && deal.contactId === c.id) || selectedContactId === c.id ? 'selected' : '' %>>
+              <%= c.fullName %> (<%= c.company ? c.company.name : 'Без фирма' %>)
+            </option>
+          <% }); %>
+        </select>
+        <small class="muted">Компанията на сделката се определя автоматично от контакта.</small>
+      </div>
+
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Етап на сделката</label>
+        <select name="stage" class="form-select" id="stageSelect">
+          <option value="new_lead" <%= deal && deal.stage === 'new_lead' ? 'selected' : '' %>>Нов лийд (20%)</option>
+          <option value="negotiation" <%= deal && deal.stage === 'negotiation' ? 'selected' : '' %>>Преговори (55%)</option>
+          <option value="closed_won" <%= deal && deal.stage === 'closed_won' ? 'selected' : '' %>>Затворена — спечелена (100%)</option>
+          <option value="closed_lost" <%= deal && deal.stage === 'closed_lost' ? 'selected' : '' %>>Затворена — загубена (0%)</option>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Стойност (лв.)</label>
+        <input type="number" step="0.01" min="1" name="value" class="form-control" value="<%= deal ? deal.value : '' %>" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Вероятност за затваряне (%)</label>
+        <input type="number" min="0" max="100" name="probability" class="form-control" id="probInput" value="<%= deal ? deal.probability : '20' %>">
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Очаквана дата на затваряне</label>
+        <input type="date" name="expectedCloseDate" class="form-control" value="<%= deal ? deal.expectedCloseDate : defaultExpectedDate %>" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Дата на реално затваряне (за спечелени/загубени)</label>
+        <input type="date" name="closedAt" class="form-control" value="<%= deal ? deal.closedAt : '' %>">
+      </div>
+    </div>
+
+    <% if (currentUser && (currentUser.role === 'admin' || currentUser.isSuperuser)) { %>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Отговорен търговец (Администратор)</label>
+        <select name="ownerId" class="form-select">
+          <% users.forEach(function(u) { %>
+            <option value="<%= u.id %>" <%= (deal && deal.ownerId === u.id) || currentUser.id === u.id ? 'selected' : '' %>>
+              <%= u.firstName %> <%= u.lastName %> (<%= u.username %>)
+            </option>
+          <% }); %>
+        </select>
+      </div>
+    <% } %>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Бележки / Условия</label>
+      <textarea name="notes" class="form-control" rows="3"><%= deal ? deal.notes : '' %></textarea>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success px-4">Запис</button>
+      <a class="btn btn-outline-secondary" href="javascript:history.back()">Назад</a>
+    </div>
+  </form>
+</div>
+
+<script>
+  const stageSelect = document.getElementById('stageSelect');
+  const probInput = document.getElementById('probInput');
+  stageSelect.addEventListener('change', function() {
+    if (this.value === 'new_lead') probInput.value = 20;
+    else if (this.value === 'negotiation') probInput.value = 55;
+    else if (this.value === 'closed_won') probInput.value = 100;
+    else if (this.value === 'closed_lost') probInput.value = 0;
+  });
+</script>
+
+<%- include('../layout/footer') %>

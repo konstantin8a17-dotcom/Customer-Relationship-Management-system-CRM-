@@ -1,0 +1,135 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Отчети за продажбите</h1>
+    <div class="muted">Конверсия по етап и резултат по представител за избран период.</div>
+  </div>
+</div>
+
+<form class="card-soft p-3 mb-3 row g-2 align-items-end" method="get" action="/reports/">
+  <div class="col-md-4">
+    <label class="form-label fw-semibold small">От дата</label>
+    <input class="form-control" type="date" name="from" value="<%= startDate %>">
+  </div>
+  <div class="col-md-4">
+    <label class="form-label fw-semibold small">До дата</label>
+    <input class="form-control" type="date" name="to" value="<%= endDate %>">
+  </div>
+  <div class="col-md-4">
+    <button class="btn btn-success w-100">Обнови отчета</button>
+  </div>
+</form>
+
+<div class="row g-3 mb-3">
+  <div class="col-md-4">
+    <div class="card-soft kpi">
+      <div class="label">Спечелени продажби</div>
+      <div class="value"><%= formatNumber(wonValue) %> лв.</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-soft kpi">
+      <div class="label">Win rate</div>
+      <div class="value"><%= formatNumber(winRate, 1) %>%</div>
+      <div class="muted"><%= closedWonCount %> спечелени / <%= closedLostCount %> загубени</div>
+    </div>
+  </div>
+  <div class="col-md-4">
+    <div class="card-soft kpi">
+      <div class="label">Период</div>
+      <div class="value fs-6 mt-1"><%= startDate %> — <%= endDate %></div>
+    </div>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card-soft p-3">
+      <h5 class="fw-bold mb-3">Конверсия по етап</h5>
+      <canvas id="convChart" height="180"></canvas>
+      <div class="table-responsive mt-3">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Етап</th>
+              <th>Брой</th>
+              <th>От предишен</th>
+              <th>От всички лийдове</th>
+            </tr>
+          </thead>
+          <tbody>
+          <% conversionRows.forEach(function(row) { %>
+            <tr>
+              <td class="fw-semibold"><%= row.label %></td>
+              <td><%= row.count %></td>
+              <td><%= formatNumber(row.rate, 0) %>%</td>
+              <td><%= formatNumber(row.fromLeads, 0) %>%</td>
+            </tr>
+          <% }); %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+  </div>
+
+  <div class="col-lg-6">
+    <div class="card-soft p-3 mb-3">
+      <h5 class="fw-bold mb-3">Продажби по представител</h5>
+      <canvas id="salesChart" height="180"></canvas>
+      <div class="table-responsive mt-3">
+        <table class="table align-middle">
+          <thead>
+            <tr>
+              <th>Представител</th>
+              <th>Сделки</th>
+              <th>Сума</th>
+            </tr>
+          </thead>
+          <tbody>
+          <% if (byRep && byRep.length > 0) { %>
+            <% byRep.forEach(function(r) { %>
+              <tr>
+                <td class="fw-semibold"><%= r.name %></td>
+                <td><%= r.deals %></td>
+                <td><%= formatNumber(r.total) %> лв.</td>
+              </tr>
+            <% }); %>
+          <% } else { %>
+            <tr><td colspan="3" class="muted p-2">Няма затворени продажби в периода.</td></tr>
+          <% } %>
+          </tbody>
+        </table>
+      </div>
+    </div>
+
+    <div class="card-soft p-3">
+      <h5 class="fw-bold mb-3">Продажби по месец</h5>
+      <canvas id="monthChart" height="140"></canvas>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+  function barChart(id, payload, color) {
+    new Chart(document.getElementById(id), {
+      type: 'bar',
+      data: {
+        labels: payload.labels,
+        datasets: [{ data: payload.values, backgroundColor: color, borderRadius: 6 }]
+      },
+      options: {
+        responsive: true,
+        plugins: { legend: { display: false } },
+        scales: { y: { beginAtZero: true } }
+      }
+    });
+  }
+
+  barChart('convChart', <%- conversionJson %>, '#0f766e');
+  barChart('salesChart', <%- salesJson %>, '#1d4ed8');
+  barChart('monthChart', <%- monthlyJson %>, '#f59e0b');
+</script>
+
+<%- include('../layout/footer') %>

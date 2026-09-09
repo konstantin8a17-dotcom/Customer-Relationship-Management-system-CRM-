@@ -1,0 +1,97 @@
+<%- include('../layout/header') %>
+
+<h1 class="page-title mb-3"><%= pageTitle %></h1>
+
+<div class="card-soft p-4" style="max-width: 720px">
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <form method="post" action="<%= formAction %>">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Заглавие на задачата</label>
+      <input type="text" name="title" class="form-control" value="<%= task ? task.title : '' %>" required placeholder="напр. Обаждане към Георги">
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Тип дейност</label>
+        <select name="kind" class="form-select" required>
+          <option value="call" <%= task && task.kind === 'call' ? 'selected' : '' %>>📞 Обаждане</option>
+          <option value="meeting" <%= task && task.kind === 'meeting' ? 'selected' : '' %>>👥 Среща</option>
+          <option value="follow_up" <%= task && task.kind === 'follow_up' ? 'selected' : '' %>>✉️ Последващо действие</option>
+          <option value="other" <%= task && task.kind === 'other' ? 'selected' : '' %>>📌 Друго</option>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Свързан контакт</label>
+        <select name="contactId" class="form-select">
+          <option value="">-- Изберете контакт --</option>
+          <% contacts.forEach(function(c) { %>
+            <option value="<%= c.id %>" <%= (task && task.contactId === c.id) || selectedContactId === c.id ? 'selected' : '' %>>
+              <%= c.fullName %> (<%= c.company ? c.company.name : 'Без фирма' %>)
+            </option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Свързана сделка</label>
+        <select name="dealId" class="form-select">
+          <option value="">-- Изберете сделка (по избор) --</option>
+          <% deals.forEach(function(d) { %>
+            <option value="<%= d.id %>" <%= (task && task.dealId === d.id) || selectedDealId === d.id ? 'selected' : '' %>>
+              <%= d.title %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Срок (Дата и час)</label>
+        <input type="datetime-local" name="dueAt" class="form-control" value="<%= taskDueAt %>" required>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Напомняне преди срока (по избор)</label>
+        <input type="datetime-local" name="reminderAt" class="form-control" value="<%= taskReminderAt %>">
+      </div>
+      <div class="col-md-6 d-flex align-items-center pt-3">
+        <div class="form-check">
+          <input class="form-check-input" type="checkbox" name="completed" id="completedCheck" value="true" <%= task && task.completed ? 'checked' : '' %>>
+          <label class="form-check-label fw-semibold" for="completedCheck">
+            Маркирай като завършена
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <% if (currentUser && (currentUser.role === 'admin' || currentUser.isSuperuser)) { %>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Отговорен търговец (Администратор)</label>
+        <select name="ownerId" class="form-select">
+          <% users.forEach(function(u) { %>
+            <option value="<%= u.id %>" <%= (task && task.ownerId === u.id) || currentUser.id === u.id ? 'selected' : '' %>>
+              <%= u.firstName %> <%= u.lastName %> (<%= u.username %>)
+            </option>
+          <% }); %>
+        </select>
+      </div>
+    <% } %>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Описание / Бележки</label>
+      <textarea name="description" class="form-control" rows="3"><%= task ? task.description : '' %></textarea>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success px-4">Запис</button>
+      <a class="btn btn-outline-secondary" href="javascript:history.back()">Назад</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../layout/footer') %>

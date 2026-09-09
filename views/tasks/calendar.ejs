@@ -1,0 +1,66 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Календар на срещи и обаждания</h1>
+    <div class="muted">График на срещи и планирани обаждания за <%= monthName %> <%= year %> г.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/tasks/">Списък задачи</a>
+    <a class="btn btn-success" href="/tasks/new/">Нова задача</a>
+  </div>
+</div>
+
+<div class="card-soft p-3 mb-3 d-flex justify-content-between align-items-center">
+  <div class="d-flex gap-2">
+    <a class="btn btn-sm btn-outline-secondary" href="/tasks/calendar/?month=<%= prevMonth %>&year=<%= prevYear %>">← Предишен</a>
+    <a class="btn btn-sm btn-outline-secondary" href="/tasks/calendar/?month=<%= nextMonth %>&year=<%= nextYear %>">Следващ →</a>
+  </div>
+  <h4 class="fw-bold mb-0"><%= monthName %> <%= year %></h4>
+  <a class="btn btn-sm btn-outline-primary" href="/tasks/calendar/">Днес</a>
+</div>
+
+<div class="card-soft p-3">
+  <div class="row g-2 text-center fw-bold border-bottom pb-2 mb-2">
+    <div class="col">Пон</div>
+    <div class="col">Вто</div>
+    <div class="col">Сря</div>
+    <div class="col">Чет</div>
+    <div class="col">Пет</div>
+    <div class="col text-primary">Съб</div>
+    <div class="col text-danger">Нед</div>
+  </div>
+
+  <div class="calendar-grid">
+    <% weeks.forEach(function(week) { %>
+      <div class="row g-2 mb-2">
+        <% week.forEach(function(cell) { %>
+          <div class="col">
+            <div class="p-2 border rounded <%= cell.isCurrentMonth ? (cell.isToday ? 'bg-light border-primary' : 'bg-white') : 'bg-light text-muted opacity-50' %>" style="min-height: 100px;">
+              <div class="d-flex justify-content-between align-items-center mb-1">
+                <span class="small fw-bold <%= cell.isToday ? 'badge bg-primary text-white' : '' %>">
+                  <%= cell.day %>
+                </span>
+                <% if (cell.tasks && cell.tasks.length > 0) { %>
+                  <span class="badge bg-secondary rounded-pill" style="font-size:0.65rem;"><%= cell.tasks.length %></span>
+                <% } %>
+              </div>
+
+              <% if (cell.tasks && cell.tasks.length > 0) { %>
+                <div class="d-flex flex-column gap-1">
+                  <% cell.tasks.forEach(function(task) { %>
+                    <a href="/tasks/<%= task.id %>/edit/" class="text-decoration-none badge text-wrap text-start <%= task.kind === 'meeting' ? 'bg-primary' : (task.kind === 'call' ? 'bg-info text-dark' : 'bg-secondary') %> p-1" style="font-size: 0.72rem;">
+                      <%= task.kind === 'meeting' ? '👥' : (task.kind === 'call' ? '📞' : '📋') %> <%= task.title %>
+                    </a>
+                  <% }); %>
+                </div>
+              <% } %>
+            </div>
+          </div>
+        <% }); %>
+      </div>
+    <% }); %>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

@@ -1,0 +1,69 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Сделки</h1>
+    <div class="muted">Обща стойност в списъка: <strong><%= formatNumber(totalValue) %> лв.</strong></div>
+  </div>
+  <a class="btn btn-success" href="/deals/new/">Нова сделка</a>
+</div>
+
+<div class="mb-3 d-flex gap-2 flex-wrap align-items-center">
+  <span class="text-muted small fw-bold">Филтър:</span>
+  <a class="btn btn-sm <%= !currentStage ? 'btn-dark' : 'btn-outline-secondary' %>" href="/deals/">Всички</a>
+  <% stages.forEach(function(s) { %>
+    <a class="btn btn-sm <%= currentStage === s.key ? 'btn-dark' : 'btn-outline-secondary' %>" href="/deals/?stage=<%= s.key %>">
+      <%= s.label %>
+    </a>
+  <% }); %>
+</div>
+
+<div class="card-soft">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Сделка</th>
+          <th>Контакт & Компания</th>
+          <th>Етап</th>
+          <th>Стойност</th>
+          <th>Вероятност</th>
+          <th>Претеглена прогноза</th>
+          <th>Представител</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% if (deals && deals.length > 0) { %>
+        <% deals.forEach(function(deal) { %>
+          <tr>
+            <td>
+              <a href="/deals/<%= deal.id %>/" class="fw-semibold text-decoration-none"><%= deal.title %></a>
+            </td>
+            <td>
+              <% if (deal.contact) { %>
+                <a href="/contacts/<%= deal.contact.id %>/" class="text-decoration-none"><%= deal.contact.fullName %></a>
+              <% } %>
+              <% if (deal.company) { %>
+                <div class="small text-muted"><%= deal.company.name %></div>
+              <% } %>
+            </td>
+            <td>
+              <span class="stage stage-<%= deal.stage %>"><%= deal.stageLabel %></span>
+            </td>
+            <td><%= formatNumber(deal.value) %> лв.</td>
+            <td><%= deal.probability %>%</td>
+            <td><%= formatNumber(deal.weightedValue) %> лв.</td>
+            <td><%= deal.ownerName %></td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="7" class="muted p-4 text-center">Няма намерени сделки за този филтър.</td>
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

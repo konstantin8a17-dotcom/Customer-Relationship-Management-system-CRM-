@@ -1,0 +1,85 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Задачи и напомняния</h1>
+    <div class="muted">Предстоящи обаждания, срещи и действия към клиенти.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/tasks/calendar/">Календар</a>
+    <a class="btn btn-success" href="/tasks/new/">Нова задача</a>
+  </div>
+</div>
+
+<div class="card-soft mb-4">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Статус</th>
+          <th>Задача</th>
+          <th>Тип</th>
+          <th>Клиент / Сделка</th>
+          <th>Срок (Краен срок)</th>
+          <th>Напомняне</th>
+          <th>Представител</th>
+          <th>Действие</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% if (tasks && tasks.length > 0) { %>
+        <% tasks.forEach(function(task) { %>
+          <tr class="<%= task.isOverdue ? 'table-warning' : '' %>">
+            <td>
+              <% if (task.completed) { %>
+                <span class="badge bg-success">изпълнена</span>
+              <% } else if (task.isOverdue) { %>
+                <span class="badge bg-danger">просрочена</span>
+              <% } else { %>
+                <span class="badge bg-primary">активна</span>
+              <% } %>
+            </td>
+            <td>
+              <a href="/tasks/<%= task.id %>/edit/" class="fw-semibold text-decoration-none text-dark"><%= task.title %></a>
+              <% if (task.description) { %>
+                <div class="small text-muted text-truncate" style="max-width:260px;"><%= task.description %></div>
+              <% } %>
+            </td>
+            <td><span class="badge bg-light text-dark border"><%= task.kindLabel %></span></td>
+            <td>
+              <% if (task.contact) { %>
+                <div><a href="/contacts/<%= task.contact.id %>/" class="text-decoration-none"><%= task.contact.fullName %></a></div>
+              <% } %>
+              <% if (task.deal) { %>
+                <div class="small"><a href="/deals/<%= task.deal.id %>/" class="text-muted"><%= task.deal.title %></a></div>
+              <% } %>
+            </td>
+            <td>
+              <span class="<%= task.isOverdue ? 'text-danger fw-bold' : '' %>">
+                <%= task.displayDue %>
+              </span>
+            </td>
+            <td><%= task.displayReminder || '—' %></td>
+            <td><%= task.ownerName %></td>
+            <td>
+              <% if (!task.completed) { %>
+                <form method="post" action="/tasks/<%= task.id %>/complete/">
+                  <button type="submit" class="btn btn-sm btn-outline-success">Завърши</button>
+                </form>
+              <% } else { %>
+                <span class="text-success small fw-bold">✓ Завършена</span>
+              <% } %>
+            </td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="8" class="muted p-4 text-center">Няма задачи.</td>
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

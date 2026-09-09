@@ -1,0 +1,131 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title"><%= contact.fullName %></h1>
+    <div class="muted">
+      <%= contact.position || 'Контакт' %> · 
+      <% if (contact.company) { %>
+        <a href="/contacts/companies/<%= contact.company.id %>/" class="fw-semibold"><%= contact.company.name %></a>
+      <% } %>
+    </div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/contacts/<%= contact.id %>/edit/">Редакция</a>
+    <a class="btn btn-outline-primary" href="/deals/new/?contact=<%= contact.id %>">Нова сделка</a>
+    <a class="btn btn-success" href="/tasks/new/?contact=<%= contact.id %>">Нова задача</a>
+  </div>
+</div>
+
+<div class="row g-3">
+  <div class="col-lg-4">
+    <div class="card-soft p-3">
+      <h6 class="fw-bold mb-3 border-bottom pb-2">Данни за контакт</h6>
+      <div class="mb-2"><strong>Имейл:</strong> <a href="mailto:<%= contact.email %>"><%= contact.email %></a></div>
+      <div class="mb-2"><strong>Телефон:</strong> <%= contact.phone || '—' %></div>
+      <div class="mb-2"><strong>Длъжност:</strong> <%= contact.position || '—' %></div>
+      <div class="mb-2"><strong>Представител:</strong> <%= contact.ownerName %></div>
+      <% if (contact.notes) { %>
+        <div class="mt-3 p-2 bg-light rounded small text-muted">
+          <strong>Бележки:</strong><br><%= contact.notes %>
+        </div>
+      <% } %>
+    </div>
+
+    <div class="card-soft p-3 mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0">Сделки (<%= contact.deals.length %>)</h6>
+        <a href="/deals/new/?contact=<%= contact.id %>" class="btn btn-sm btn-outline-primary">+ Сделка</a>
+      </div>
+      <% if (contact.deals && contact.deals.length > 0) { %>
+        <% contact.deals.forEach(function(deal) { %>
+          <div class="py-2 border-bottom">
+            <a href="/deals/<%= deal.id %>/" class="fw-semibold text-decoration-none"><%= deal.title %></a>
+            <div class="small mt-1">
+              <span class="stage stage-<%= deal.stage %>"><%= deal.stageLabel %></span> · <%= formatNumber(deal.value) %> лв.
+            </div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="muted small mb-0">Няма сделки с този контакт.</p>
+      <% } %>
+    </div>
+
+    <div class="card-soft p-3 mt-3">
+      <div class="d-flex justify-content-between align-items-center mb-2">
+        <h6 class="fw-bold mb-0">Задачи (<%= contact.tasks.length %>)</h6>
+        <a href="/tasks/new/?contact=<%= contact.id %>" class="btn btn-sm btn-outline-success">+ Задача</a>
+      </div>
+      <% if (contact.tasks && contact.tasks.length > 0) { %>
+        <% contact.tasks.forEach(function(task) { %>
+          <div class="py-2 border-bottom d-flex justify-content-between align-items-center">
+            <div>
+              <a href="/tasks/<%= task.id %>/edit/" class="text-decoration-none"><%= task.title %></a>
+              <div class="small text-muted"><%= task.displayDue %></div>
+            </div>
+            <% if (task.completed) { %>
+              <span class="badge bg-success">готово</span>
+            <% } %>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="muted small mb-0">Няма задачи към този контакт.</p>
+      <% } %>
+    </div>
+  </div>
+
+  <div class="col-lg-8">
+    <div class="card-soft p-3 mb-3">
+      <h5 class="fw-bold mb-3">История на комуникацията</h5>
+      <% if (contact.communications && contact.communications.length > 0) { %>
+        <% contact.communications.forEach(function(item) { %>
+          <div class="py-2 border-bottom">
+            <div class="d-flex justify-content-between">
+              <div>
+                <span class="badge bg-secondary me-1"><%= item.kindLabel %></span>
+                <strong><%= item.subject %></strong>
+              </div>
+              <small class="muted"><%= item.displayDate %></small>
+            </div>
+            <div class="muted small mt-1">Записано от: <%= item.createdBy ? (item.createdBy.firstName + ' ' + item.createdBy.lastName).trim() : 'Система' %></div>
+            <div class="mt-2 text-dark"><%= item.body %></div>
+          </div>
+        <% }); %>
+      <% } else { %>
+        <p class="muted">Все още няма записана комуникация.</p>
+      <% } %>
+    </div>
+
+    <div class="card-soft p-3">
+      <h5 class="fw-bold mb-3">Нов запис на комуникация</h5>
+      <form method="post" action="/contacts/<%= contact.id %>/communication/">
+        <div class="row g-2 mb-2">
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Тип</label>
+            <select name="kind" class="form-select" required>
+              <option value="call">Обаждане</option>
+              <option value="meeting">Среща</option>
+              <option value="email">Имейл</option>
+              <option value="note">Бележка</option>
+            </select>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Дата и час</label>
+            <input type="datetime-local" name="occurredAt" class="form-control" value="<%= currentDateTime %>" required>
+          </div>
+          <div class="col-md-4">
+            <label class="form-label small fw-semibold">Тема</label>
+            <input type="text" name="subject" class="form-control" placeholder="Напр. Оферта, Разговор" required>
+          </div>
+        </div>
+        <div class="mb-3">
+          <label class="form-label small fw-semibold">Съдържание</label>
+          <textarea name="body" class="form-control" rows="3" placeholder="Бележки или резюме на разговора..." required></textarea>
+        </div>
+        <button type="submit" class="btn btn-success">Запиши комуникацията</button>
+      </form>
+    </div>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

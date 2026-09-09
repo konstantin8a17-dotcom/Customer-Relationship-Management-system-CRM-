@@ -1,0 +1,67 @@
+<%- include('../layout/header') %>
+
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Контакти</h1>
+    <div class="muted">Хора и компании в портфолиото ви.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="/contacts/companies/">Компании</a>
+    <a class="btn btn-success" href="/contacts/new/">Нов контакт</a>
+  </div>
+</div>
+
+<form class="mb-3" method="get" action="/contacts/">
+  <div class="input-group">
+    <input class="form-control" name="q" value="<%= typeof q !== 'undefined' ? q : '' %>" placeholder="Търсене по име или имейл">
+    <button class="btn btn-outline-secondary" type="submit">Търси</button>
+    <% if (typeof q !== 'undefined' && q) { %>
+      <a class="btn btn-outline-danger" href="/contacts/">Изчисти</a>
+    <% } %>
+  </div>
+</form>
+
+<div class="card-soft">
+  <div class="table-responsive">
+    <table class="table align-middle">
+      <thead>
+        <tr>
+          <th>Име</th>
+          <th>Компания</th>
+          <th>Длъжност</th>
+          <th>Имейл</th>
+          <th>Телефон</th>
+          <th>Представител</th>
+        </tr>
+      </thead>
+      <tbody>
+      <% if (contacts && contacts.length > 0) { %>
+        <% contacts.forEach(function(c) { %>
+          <tr>
+            <td>
+              <a href="/contacts/<%= c.id %>/" class="fw-semibold text-decoration-none"><%= c.fullName %></a>
+            </td>
+            <td>
+              <% if (c.company) { %>
+                <a href="/contacts/companies/<%= c.company.id %>/" class="text-decoration-none"><%= c.company.name %></a>
+              <% } else { %>
+                —
+              <% } %>
+            </td>
+            <td><%= c.position || '—' %></td>
+            <td><a href="mailto:<%= c.email %>" class="text-muted"><%= c.email %></a></td>
+            <td><%= c.phone || '—' %></td>
+            <td><%= c.ownerName %></td>
+          </tr>
+        <% }); %>
+      <% } else { %>
+        <tr>
+          <td colspan="6" class="muted p-4 text-center">Няма намерени контакти.</td>
+        </tr>
+      <% } %>
+      </tbody>
+    </table>
+  </div>
+</div>
+
+<%- include('../layout/footer') %>

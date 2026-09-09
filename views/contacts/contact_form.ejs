@@ -1,0 +1,76 @@
+<%- include('../layout/header') %>
+
+<h1 class="page-title mb-3"><%= pageTitle %></h1>
+
+<div class="card-soft p-4" style="max-width: 720px">
+  <% if (typeof error !== 'undefined' && error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <form method="post" action="<%= formAction %>">
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Име</label>
+        <input type="text" name="firstName" class="form-control" value="<%= contact ? contact.firstName : '' %>" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Фамилия</label>
+        <input type="text" name="lastName" class="form-control" value="<%= contact ? contact.lastName : '' %>" required>
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Имейл</label>
+        <input type="email" name="email" class="form-control" value="<%= contact ? contact.email : '' %>" required>
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Телефон</label>
+        <input type="text" name="phone" class="form-control" value="<%= contact ? contact.phone : '' %>">
+      </div>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Длъжност</label>
+        <input type="text" name="position" class="form-control" value="<%= contact ? contact.position : '' %>">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Компания</label>
+        <select name="companyId" class="form-select" required>
+          <option value="">-- Изберете компания --</option>
+          <% companies.forEach(function(comp) { %>
+            <option value="<%= comp.id %>" <%= (contact && contact.companyId === comp.id) || selectedCompanyId === comp.id ? 'selected' : '' %>>
+              <%= comp.name %>
+            </option>
+          <% }); %>
+        </select>
+      </div>
+    </div>
+
+    <% if (currentUser && (currentUser.role === 'admin' || currentUser.isSuperuser)) { %>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Отговорен търговец (Администратор)</label>
+        <select name="ownerId" class="form-select">
+          <% users.forEach(function(u) { %>
+            <option value="<%= u.id %>" <%= (contact && contact.ownerId === u.id) || currentUser.id === u.id ? 'selected' : '' %>>
+              <%= u.firstName %> <%= u.lastName %> (<%= u.username %>)
+            </option>
+          <% }); %>
+        </select>
+      </div>
+    <% } %>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Бележки</label>
+      <textarea name="notes" class="form-control" rows="3"><%= contact ? contact.notes : '' %></textarea>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success px-4">Запис</button>
+      <a class="btn btn-outline-secondary" href="javascript:history.back()">Назад</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../layout/footer') %>

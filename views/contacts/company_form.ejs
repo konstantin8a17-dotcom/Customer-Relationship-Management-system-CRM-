@@ -1,0 +1,57 @@
+<%- include('../layout/header') %>
+
+<h1 class="page-title mb-3"><%= pageTitle %></h1>
+
+<div class="card-soft p-4" style="max-width: 720px">
+  <% if (error) { %>
+    <div class="alert alert-danger"><%= error %></div>
+  <% } %>
+
+  <form method="post" action="<%= formAction %>">
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Име на компания</label>
+      <input type="text" name="name" class="form-control" value="<%= company ? company.name : '' %>" required>
+    </div>
+
+    <div class="row g-3 mb-3">
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Индустрия / Сектор</label>
+        <input type="text" name="industry" class="form-control" placeholder="напр. IT услуги, Туризъм" value="<%= company ? company.industry : '' %>">
+      </div>
+      <div class="col-md-6">
+        <label class="form-label fw-semibold">Уебсайт</label>
+        <input type="url" name="website" class="form-control" placeholder="https://..." value="<%= company ? company.website : '' %>">
+      </div>
+    </div>
+
+    <div class="mb-3">
+      <label class="form-label fw-semibold">Адрес / Град</label>
+      <input type="text" name="address" class="form-control" value="<%= company ? company.address : '' %>">
+    </div>
+
+    <% if (currentUser && (currentUser.role === 'admin' || currentUser.isSuperuser)) { %>
+      <div class="mb-3">
+        <label class="form-label fw-semibold">Отговорен търговец (Администратор)</label>
+        <select name="ownerId" class="form-select">
+          <% users.forEach(function(u) { %>
+            <option value="<%= u.id %>" <%= (company && company.ownerId === u.id) || currentUser.id === u.id ? 'selected' : '' %>>
+              <%= u.firstName %> <%= u.lastName %> (<%= u.username %>)
+            </option>
+          <% }); %>
+        </select>
+      </div>
+    <% } %>
+
+    <div class="mb-4">
+      <label class="form-label fw-semibold">Бележки</label>
+      <textarea name="notes" class="form-control" rows="3"><%= company ? company.notes : '' %></textarea>
+    </div>
+
+    <div class="d-flex gap-2">
+      <button type="submit" class="btn btn-success px-4">Запис</button>
+      <a class="btn btn-outline-secondary" href="javascript:history.back()">Назад</a>
+    </div>
+  </form>
+</div>
+
+<%- include('../layout/footer') %>
