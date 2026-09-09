@@ -1,0 +1,74 @@
+{% load humanize %}
+{% extends "base.html" %}
+{% block title %}Табло · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Табло</h1>
+    <div class="muted">Преглед на pipeline, прогноза и предстоящи действия.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'contact_create' %}">Нов контакт</a>
+    <a class="btn btn-success" href="{% url 'deal_create' %}">Нова сделка</a>
+  </div>
+</div>
+<div class="row g-3 mb-4">
+  <div class="col-md-3"><div class="card-soft kpi"><div class="label">Контакти</div><div class="value">{{ contact_count }}</div></div></div>
+  <div class="col-md-3"><div class="card-soft kpi"><div class="label">Отворени сделки</div><div class="value">{{ open_count }}</div><div class="muted">{{ open_value|floatformat:0|intcomma }} лв.</div></div></div>
+  <div class="col-md-3"><div class="card-soft kpi"><div class="label">Претеглена прогноза</div><div class="value">{{ forecast|floatformat:0|intcomma }} лв.</div></div></div>
+  <div class="col-md-3"><div class="card-soft kpi"><div class="label">Спечелени / просрочени задачи</div><div class="value">{{ won_value|floatformat:0|intcomma }} лв.</div><div class="muted">{{ due_tasks }} задачи днес или просрочени</div></div></div>
+</div>
+<div class="row g-3">
+  <div class="col-lg-6">
+    <div class="card-soft p-3">
+      <h5>Текущ pipeline</h5>
+      <canvas id="funnelChart" height="180"></canvas>
+    </div>
+  </div>
+  <div class="col-lg-6">
+    <div class="card-soft p-3">
+      <h5>Предстоящи задачи</h5>
+      {% for task in upcoming %}
+        <div class="d-flex justify-content-between border-bottom py-2">
+          <div>
+            <strong>{{ task.title }}</strong>
+            <div class="muted small">{{ task.get_kind_display }} · {{ task.due_at }}</div>
+          </div>
+          <a href="{% url 'task_update' task.pk %}">отвори</a>
+        </div>
+      {% empty %}
+        <p class="muted mb-0">Няма предстоящи задачи.</p>
+      {% endfor %}
+    </div>
+  </div>
+</div>
+<div class="card-soft p-3 mt-3">
+  <h5>Последни сделки</h5>
+  <table class="table">
+    <thead><tr><th>Сделка</th><th>Етап</th><th>Стойност</th><th>Вероятност</th><th>Представител</th></tr></thead>
+    <tbody>
+    {% for deal in recent_deals %}
+      <tr>
+        <td><a href="{{ deal.get_absolute_url }}">{{ deal.title }}</a></td>
+        <td><span class="stage stage-{{ deal.stage }}">{{ deal.get_stage_display }}</span></td>
+        <td>{{ deal.value|floatformat:0|intcomma }} лв.</td>
+        <td>{{ deal.probability }}%</td>
+        <td>{{ deal.owner.get_full_name|default:deal.owner.username }}</td>
+      </tr>
+    {% endfor %}
+    </tbody>
+  </table>
+</div>
+{% endblock %}
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+{{ funnel_json|json_script:"funnel-data" }}
+<script>
+const funnel = JSON.parse(document.getElementById('funnel-data').textContent);
+new Chart(document.getElementById('funnelChart'), {
+  type: 'bar',
+  data: { labels: funnel.labels, datasets: [{ data: funnel.values, backgroundColor: ['#0ea5e9','#f59e0b','#10b981'] }] },
+  options: { plugins: { legend: { display: false } }, scales: { y: { beginAtZero: true, ticks: { precision: 0 } } } }
+});
+</script>
+{% endblock %}

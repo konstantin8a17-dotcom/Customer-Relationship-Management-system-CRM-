@@ -1,0 +1,33 @@
+{% extends "base.html" %}
+{% block title %}Контакти · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Контакти</h1>
+    <div class="muted">Хора и компании в портфолиото ви.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'company_list' %}">Компании</a>
+    <a class="btn btn-success" href="{% url 'contact_create' %}">Нов контакт</a>
+  </div>
+</div>
+<form class="mb-3" method="get"><input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Търсене по име или имейл"></form>
+<div class="card-soft">
+<table class="table">
+  <thead><tr><th>Име</th><th>Компания</th><th>Имейл</th><th>Телефон</th><th>Представител</th></tr></thead>
+  <tbody>
+  {% for c in contacts %}
+    <tr>
+      <td><a href="{{ c.get_absolute_url }}">{{ c.full_name }}</a></td>
+      <td><a href="{{ c.company.get_absolute_url }}">{{ c.company }}</a></td>
+      <td>{{ c.email }}</td>
+      <td>{{ c.phone }}</td>
+      <td>{{ c.owner.get_full_name|default:c.owner.username }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5" class="muted p-3">Няма контакти.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

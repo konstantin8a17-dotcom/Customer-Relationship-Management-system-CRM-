@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Задачи · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Задачи и напомняния</h1>
+    <div class="muted">Свързани с клиент или сделка. Просрочените са маркирани.</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="?done=1">Покажи изпълнени</a>
+    <a class="btn btn-success" href="{% url 'task_create' %}">Нова задача</a>
+  </div>
+</div>
+<div class="card-soft">
+<table class="table">
+  <thead><tr><th>Задача</th><th>Тип</th><th>Срок</th><th>Свързано</th><th></th></tr></thead>
+  <tbody>
+  {% for task in tasks %}
+    <tr>
+      <td>
+        <a href="{% url 'task_update' task.pk %}">{{ task.title }}</a>
+        {% if task.completed %}<span class="stage stage-closed_won">готово</span>{% endif %}
+      </td>
+      <td>{{ task.get_kind_display }}</td>
+      <td>{{ task.due_at }}</td>
+      <td>
+        {% if task.contact %}<a href="{{ task.contact.get_absolute_url }}">{{ task.contact }}</a>{% endif %}
+        {% if task.deal %} · <a href="{{ task.deal.get_absolute_url }}">{{ task.deal }}</a>{% endif %}
+      </td>
+      <td>
+        {% if not task.completed %}
+        <form method="post" action="{% url 'task_complete' task.pk %}">{% csrf_token %}<button class="btn btn-sm btn-outline-success">Готово</button></form>
+        {% endif %}
+      </td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="5" class="muted p-3">Няма задачи.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

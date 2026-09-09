@@ -1,0 +1,13 @@
+{% extends "base.html" %}
+{% block title %}{{ page_title }} · CRM{% endblock %}
+{% block content %}
+<h1 class="page-title mb-3">{{ page_title }}</h1>
+<div class="card-soft p-4" style="max-width:720px">
+  <form method="post">
+    {% csrf_token %}
+    {% include "_form_fields.html" %}
+    <button class="btn btn-success">Запис</button>
+    <a class="btn btn-link" href="javascript:history.back()">Назад</a>
+  </form>
+</div>
+{% endblock %}

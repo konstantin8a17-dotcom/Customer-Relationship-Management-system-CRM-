@@ -1,0 +1,24 @@
+{% extends "base.html" %}
+{% block title %}{{ object.name }} · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">{{ object.name }}</h1>
+    <div class="muted">{{ object.industry }} · {{ object.address }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="{% url 'company_update' object.pk %}">Редакция</a>
+    <a class="btn btn-success" href="{% url 'contact_create' %}?company={{ object.pk }}">Нов контакт</a>
+  </div>
+</div>
+<div class="card-soft p-3">
+  <p class="mb-1">{% if object.website %}<a href="{{ object.website }}">{{ object.website }}</a>{% endif %}</p>
+  <p class="muted">{{ object.notes }}</p>
+  <h5>Контакти</h5>
+  {% for c in object.contacts.all %}
+    <div class="py-2 border-bottom"><a href="{{ c.get_absolute_url }}">{{ c.full_name }}</a> · {{ c.position }}</div>
+  {% empty %}
+    <p class="muted">Няма свързани хора.</p>
+  {% endfor %}
+</div>
+{% endblock %}

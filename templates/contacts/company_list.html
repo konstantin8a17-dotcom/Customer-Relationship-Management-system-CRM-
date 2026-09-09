@@ -1,0 +1,25 @@
+{% extends "base.html" %}
+{% block title %}Компании · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h1 class="page-title">Компании</h1>
+  <a class="btn btn-success" href="{% url 'company_create' %}">Нова компания</a>
+</div>
+<form class="mb-3" method="get"><input class="form-control" name="q" value="{{ request.GET.q }}" placeholder="Търсене по име"></form>
+<div class="card-soft">
+<table class="table">
+  <thead><tr><th>Компания</th><th>Индустрия</th><th>Представител</th></tr></thead>
+  <tbody>
+  {% for c in companies %}
+    <tr>
+      <td><a href="{{ c.get_absolute_url }}">{{ c.name }}</a></td>
+      <td>{{ c.industry }}</td>
+      <td>{{ c.owner.get_full_name|default:c.owner.username }}</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="3" class="muted p-3">Няма компании.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

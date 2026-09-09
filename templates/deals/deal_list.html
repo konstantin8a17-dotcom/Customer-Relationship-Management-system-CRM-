@@ -1,0 +1,37 @@
+{% load humanize %}
+{% extends "base.html" %}
+{% block title %}Сделки · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Сделки</h1>
+    <div class="muted">Обща стойност в списъка: {{ total_value|floatformat:0|intcomma }} лв.</div>
+  </div>
+  <a class="btn btn-success" href="{% url 'deal_create' %}">Нова сделка</a>
+</div>
+<div class="mb-3 d-flex gap-2 flex-wrap">
+  <a class="btn btn-sm btn-outline-secondary" href="{% url 'deal_list' %}">Всички</a>
+  {% for key, label in stages %}
+    <a class="btn btn-sm btn-outline-secondary" href="?stage={{ key }}">{{ label }}</a>
+  {% endfor %}
+</div>
+<div class="card-soft">
+<table class="table">
+  <thead><tr><th>Сделка</th><th>Контакт</th><th>Етап</th><th>Стойност</th><th>%</th><th>Прогноза</th></tr></thead>
+  <tbody>
+  {% for deal in deals %}
+    <tr>
+      <td><a href="{{ deal.get_absolute_url }}">{{ deal.title }}</a></td>
+      <td>{{ deal.contact }}</td>
+      <td><span class="stage stage-{{ deal.stage }}">{{ deal.get_stage_display }}</span></td>
+      <td>{{ deal.value|floatformat:0|intcomma }} лв.</td>
+      <td>{{ deal.probability }}%</td>
+      <td>{{ deal.weighted_value|floatformat:0|intcomma }} лв.</td>
+    </tr>
+  {% empty %}
+    <tr><td colspan="6" class="muted p-3">Няма сделки.</td></tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}

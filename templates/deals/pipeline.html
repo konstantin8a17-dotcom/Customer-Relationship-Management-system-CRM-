@@ -1,0 +1,54 @@
+{% load humanize %}
+{% extends "base.html" %}
+{% block title %}Pipeline · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Pipeline</h1>
+    <div class="muted">Нов лийд → Преговори → Затворена. Преместете сделката с бутоните на картата.</div>
+  </div>
+  <a class="btn btn-success" href="{% url 'deal_create' %}">Нова сделка</a>
+</div>
+<div class="pipeline">
+  {% for col in columns %}
+  <div class="card-soft pipeline-col">
+    <div class="d-flex justify-content-between mb-3">
+      <strong>{{ col.label }}</strong>
+      <span class="muted">{{ col.value|floatformat:0|intcomma }} лв.</span>
+    </div>
+    {% for deal in col.deals %}
+      <div class="deal-card">
+        <h6><a href="{{ deal.get_absolute_url }}">{{ deal.title }}</a></h6>
+        <div class="muted small">{{ deal.contact }} · {{ deal.company }}</div>
+        <div class="fw-bold my-1">{{ deal.value|floatformat:0|intcomma }} лв. · {{ deal.probability }}%</div>
+        <div class="d-flex gap-1 flex-wrap">
+          {% if deal.stage != 'new_lead' %}
+          <form method="post" action="{% url 'deal_stage' deal.pk %}">{% csrf_token %}<input type="hidden" name="stage" value="new_lead"><button class="btn btn-sm btn-outline-secondary">Лийд</button></form>
+          {% endif %}
+          {% if deal.stage != 'negotiation' %}
+          <form method="post" action="{% url 'deal_stage' deal.pk %}">{% csrf_token %}<input type="hidden" name="stage" value="negotiation"><button class="btn btn-sm btn-outline-warning">Преговори</button></form>
+          {% endif %}
+          {% if deal.stage != 'closed_won' %}
+          <form method="post" action="{% url 'deal_stage' deal.pk %}">{% csrf_token %}<input type="hidden" name="stage" value="closed_won"><button class="btn btn-sm btn-outline-success">Спечелена</button></form>
+          {% endif %}
+          <form method="post" action="{% url 'deal_stage' deal.pk %}">{% csrf_token %}<input type="hidden" name="stage" value="closed_lost"><button class="btn btn-sm btn-outline-danger">Загубена</button></form>
+        </div>
+      </div>
+    {% empty %}
+      <p class="muted">Празно</p>
+    {% endfor %}
+  </div>
+  {% endfor %}
+</div>
+{% if lost_deals %}
+<h5 class="mt-4">Загубени сделки</h5>
+<div class="card-soft p-3">
+  {% for deal in lost_deals %}
+    <div class="d-flex justify-content-between py-2 border-bottom">
+      <a href="{{ deal.get_absolute_url }}">{{ deal.title }}</a>
+      <span>{{ deal.value|floatformat:0|intcomma }} лв.</span>
+    </div>
+  {% endfor %}
+</div>
+{% endif %}
+{% endblock %}

@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+{% block title %}Календар · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <div>
+    <h1 class="page-title">Календар на срещи и обаждания</h1>
+    <div class="muted">{{ month_name }} {{ year }}</div>
+  </div>
+  <div class="d-flex gap-2">
+    <a class="btn btn-outline-secondary" href="?year={{ prev.year }}&month={{ prev.month }}">Предишен</a>
+    <a class="btn btn-outline-secondary" href="?year={{ next.year }}&month={{ next.month }}">Следващ</a>
+  </div>
+</div>
+<table class="calendar">
+  <thead>
+    <tr>
+      <th>Пон</th><th>Вт</th><th>Ср</th><th>Чет</th><th>Пет</th><th>Съб</th><th>Нед</th>
+    </tr>
+  </thead>
+  <tbody>
+  {% for week in weeks %}
+    <tr>
+      {% for day in week %}
+        <td class="cal-day {% if day.month != month %}out{% endif %} {% if day == today %}today{% endif %}">
+          <strong>{{ day.day }}</strong>
+          {% for task in by_day|default_if_none:None %}{% endfor %}
+          {% with items=by_day %}
+            {% for d, events in items.items %}
+              {% if d == day %}
+                {% for task in events %}
+                  <div class="event event-{{ task.kind }}"><a href="{% url 'task_update' task.pk %}">{{ task.title }}</a></div>
+                {% endfor %}
+              {% endif %}
+            {% endfor %}
+          {% endwith %}
+        </td>
+      {% endfor %}
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+{% endblock %}

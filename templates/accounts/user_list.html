@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Потребители · CRM{% endblock %}
+{% block content %}
+<div class="topbar">
+  <h1 class="page-title">Потребители и роли</h1>
+  <a class="btn btn-success" href="{% url 'user_create' %}">Нов потребител</a>
+</div>
+<div class="card-soft">
+<table class="table">
+  <thead><tr><th>Име</th><th>Потребител</th><th>Роля</th><th>Имейл</th></tr></thead>
+  <tbody>
+  {% for u in users %}
+    <tr>
+      <td>{{ u.get_full_name|default:"—" }}</td>
+      <td>{{ u.username }}</td>
+      <td>{{ u.profile.get_role_display }}</td>
+      <td>{{ u.email }}</td>
+    </tr>
+  {% endfor %}
+  </tbody>
+</table>
+</div>
+{% endblock %}
